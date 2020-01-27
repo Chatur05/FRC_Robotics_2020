@@ -7,14 +7,14 @@
 
 package frc.robot.subsystems;
 
-
-
-import frc.robot.pixy2.Pixy2;
-import frc.robot.pixy2.Pixy2.LinkType;
+import io.github.pseudoresonance.pixy2api.Pixy2;
+import io.github.pseudoresonance.pixy2api.Pixy2CCC.Block;
+import io.github.pseudoresonance.pixy2api.links.*;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 //import edu.wpi.first.wpilibj.Servo;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 //import frc.robot.pixy2.PIDLoop;
-import frc.robot.pixy2.Pixy2CCC.Block;
+import io.github.pseudoresonance.pixy2api.*;
 
 //README: For those who are wondering at what numBlocks are
 //in the previous C++ code, Roba has discovered it is 
@@ -24,36 +24,20 @@ import frc.robot.pixy2.Pixy2CCC.Block;
 public class Vision extends SubsystemBase {
 
     private Pixy2 pixy;
-//   private Servo panServo;
-//   private Servo tiltServo;
     private int width;
     private int height;
-//  private PIDLoop panLoop;
-//  private PIDLoop tiltLoop;
     private short index; //short is the java version of int16_t
 
     public Vision()
     {
       System.out.println("I am here");
-        pixy = Pixy2.createInstance(LinkType.SPI);
-       // panServo = new Servo(RobotMap.pixyPanPort);
-       // tiltServo = new Servo(RobotMap.pixyTiltPort);
+        pixy = Pixy2.createInstance(new SPILink());
         pixy.init();
         index -= 1;
-//        panLoop = new PIDLoop(400, 0, 400, true);
-//        tiltLoop = new PIDLoop(500, 0, 500, true);
         System.out.println("Pixy initialized successfully!");
-//        panServo.set(.5);
-//        tiltServo.set(.5);
         pixy.changeProg("color_connected_components".toCharArray());
 
     }
-
-    /*@Override
-    public void initDefaultCommand()
-    {
-        setDefaultCommand(new TrackReflectiveTape());
-    }*/
 
     public Pixy2 getPixy(){
         return pixy;
@@ -83,9 +67,7 @@ public class Vision extends SubsystemBase {
 
     public void trackOrangeBall() {
         // use ccc program to track objects
-        Block block = null;
-        int panOffset, tiltOffset;
-        
+        Block block = null;    
         
         pixy.getCCC().getBlocks(false, 1, 1);
         if (index == -1){
@@ -96,16 +78,7 @@ public class Vision extends SubsystemBase {
           block = trackBlock(index);
         
         if (block != null)
-        {   
-//          panOffset = (int)pixy.getFrameWidth()/2 - (int)block.getX();
-//          tiltOffset = (int)block.getY() - (int)pixy.getFrameHeight()/2;  
-      
-//          panLoop.update(panOffset);
-//          tiltLoop.update(tiltOffset);
-        
-//          panServo.set(panLoop.m_command/1000.0);
-//          tiltServo.set(tiltLoop.m_command/1000.0);
-    
+        {       
           block.print();
 
           width = block.getWidth();
@@ -113,10 +86,6 @@ public class Vision extends SubsystemBase {
         }
         else // no object detected, go into reset state
         {
-//          panLoop.reset();
-//          tiltLoop.reset();
-//          panServo.set(0.5);
-//          tiltServo.set(0.5);
           index = -1;
           width = -1; //int cannot be NULL in java
           height = -1; //int cannot be NULL in java
@@ -127,8 +96,6 @@ public class Vision extends SubsystemBase {
       // use ccc program to track objects
       //two pieces of tape to track
       Block block1 = null;
-      //Block block2 = null;
-      int panOffset, tiltOffset;
       
       pixy.getCCC().getBlocks(false, 1, 1);
       if (index == -1){
@@ -137,49 +104,27 @@ public class Vision extends SubsystemBase {
       // If we've found the first block, find it, track it
       if (index>=0)
         block1 = trackBlock(index);
-      
-      //  index = acquireBlock(1);
-      // After we've found the second block, find it, track it
- //     if (index>=0)
- //       block2 = trackBlock(index);
-      
+            
       if (block1 != null) // && block2 != null)
       {   
-//        panOffset = (int)pixy.getFrameWidth()/2 - ((int)block1.getX() + (int)block2.getX())/2;
-//        tiltOffset = (int)block1.getY() - (int)pixy.getFrameHeight()/2;  
-    
-//        panLoop.update(panOffset);
-//        tiltLoop.update(tiltOffset);
-      
-//       panServo.set(panLoop.m_command/1000.0);
-//       tiltServo.set(tiltLoop.m_command/1000.0);
     
         width = block1.getWidth();
         height = block1.getHeight();
+        SmartDashboard.putNumber("Target 1 X", block1.getX());
+        SmartDashboard.putNumber("Target 1 Y", block1.getY());
+        SmartDashboard.putNumber("Target 1 Box Width", block1.getWidth());
+        SmartDashboard.putNumber("Target 1 Angle", block1.getAngle());
+        SmartDashboard.putNumber("Target 1 Box Height",block1.getHeight());
       }
       else // no object detected, go into reset state
       {
-/*        panLoop.reset();
-        tiltLoop.reset();
-        panServo.set(0.5);
-        tiltServo.set(0.5);
-*/        index = -1;
+
+        index = -1;
         width = -1; //int cannot be NULL in java
         height = -1;  //int cannot be NULL in java
       }
     }
-    
-    
-/*    public double returnPanValue(int heading)
-    {
-      return panServo.getAngle() + heading;
-    }
-
-    public double returnTiltValue(int heading)
-    {
-      return tiltServo.getAngle() + heading;
-    }
-*/    
+     
     //width of target in pixels
     public int returnWidthValue()
     {

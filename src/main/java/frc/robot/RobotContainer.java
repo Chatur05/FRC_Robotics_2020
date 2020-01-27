@@ -45,7 +45,9 @@ public class RobotContainer {
   public RobotContainer() {
     // Configure the button bindings
     configureButtonBindings();
-    vTest.setDefaultCommand(
+    
+    Requires Vision;
+        vTest.setDefaultCommand(
       new RunCommand(() -> vTest.trackVisionTarget()));
      
 
